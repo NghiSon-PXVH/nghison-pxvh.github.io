@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <!--
-  TRANG KHỞI CHẠY (v22) – đặt trên GitHub Pages để "Thêm vào màn hình chính" có logo + tên.
+  TRANG KHỞI CHẠY (v22.3) – đặt trên GitHub Pages để "Thêm vào màn hình chính" có logo + tên.
   Trang này KHÔNG chứa dữ liệu, PIN hay mã phiên; chỉ nhúng web app Apps Script (URL /exec) toàn màn hình.
   Có thêm khoá mở ứng dụng bằng Face ID / vân tay (WebAuthn, khoá nằm trong máy, không gửi đi đâu).
   Đổi web app: chỉ sửa APP_URL bên dưới (URL triển khai, kết thúc bằng /exec).
@@ -13,7 +13,8 @@
 <meta name="description" content="Quản lý kỹ thuật Phân xưởng Vận hành – Công ty Nhiệt điện Nghi Sơn">
 <meta name="theme-color" content="#193887">
 <!-- iPhone/iPad -->
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://nghison-pxvh.github.io/apple-touch-icon.png?v=22">
+<link rel="apple-touch-icon-precomposed" sizes="180x180" href="https://nghison-pxvh.github.io/apple-touch-icon.png?v=22">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Quản lý kỹ thuật Phân xưởng Vận hành-NĐNS">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -21,14 +22,18 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="application-name" content="PXVH-NĐNS">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" type="image/png" href="favicon.png">
+<link rel="icon" type="image/png" sizes="48x48" href="favicon.png?v=22">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=22">
 <style>
   :root { --evn: #193887; --evn-2: #2A4A98; --sky: #80BEFF; --red: #EC3236; --ink: #1B2430; --muted: #5A6472; }
   html, body { margin: 0; height: 100%; overflow: hidden; }
-  body { background: var(--evn); font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif; color: var(--ink); }
+  /* v22.3: nền dưới cùng màu nền web app (không còn dải xanh đáy); dải xanh chỉ ở vùng thanh trạng thái */
+  body { background: #E6ECF5; font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif; color: var(--ink); }
   /* Thanh trạng thái iPhone (tai thỏ) tô xanh EVN; web app nằm ngay dưới */
-  #app { position: fixed; left: 0; right: 0; bottom: 0; top: env(safe-area-inset-top); width: 100%;
-         height: calc(100% - env(safe-area-inset-top)); border: 0; display: block; background: #fff; }
+  #tai { position: fixed; left: 0; right: 0; top: 0; height: env(safe-area-inset-top); background: var(--evn); z-index: 1; }
+  #app { position: fixed; left: 0; right: 0; top: env(safe-area-inset-top); width: 100%;
+         height: calc(100vh - env(safe-area-inset-top)); height: calc(100dvh - env(safe-area-inset-top));
+         border: 0; display: block; background: #E6ECF5; }
   .man { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
          gap: 14px; z-index: 2; text-align: center; padding: 24px 20px calc(24px + env(safe-area-inset-bottom));
          background: linear-gradient(160deg, var(--evn) 0%, #2F5DB3 65%, var(--sky) 100%); color: #fff; }
@@ -80,6 +85,7 @@
   <div class="nut"><button class="khong" id="btnKhong">Để sau</button><button class="co" id="btnBat">Bật</button></div>
 </div>
 
+<div id="tai"></div>
 <iframe id="app" title="Quản lý kỹ thuật Phân xưởng Vận hành"
   allow="clipboard-write; fullscreen" referrerpolicy="no-referrer-when-downgrade"></iframe>
 <script>
