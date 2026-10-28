@@ -3,8 +3,11 @@
 <head>
 <meta charset="utf-8">
 <!--
-  TRANG KHỞI CHẠY (v22.3) – đặt trên GitHub Pages để "Thêm vào màn hình chính" có logo + tên.
-  Trang này KHÔNG chứa dữ liệu, PIN hay mã phiên; chỉ nhúng web app Apps Script (URL /exec) toàn màn hình.
+  TRANG KHỞI CHẠY (v24.2) – đặt trên GitHub Pages để "Thêm vào màn hình chính" có logo + tên.
+  Trang này KHÔNG chứa dữ liệu hay PIN; chỉ nhúng web app Apps Script (URL /exec) toàn màn hình.
+  v24.1: giữ hộ "mã phiên ghi nhớ" của web app (có chữ ký, không phải PIN) để mở lại không phải đăng nhập –
+  điện thoại hay xoá dữ liệu của web app chạy lồng bên trong. Chỉ nhận / trả mã phiên cho web app Apps Script.
+  v24.2: tải hộ file Excel do web app gửi sang (iPhone không cho tải file từ khung lồng bên trong).
   Có thêm khoá mở ứng dụng bằng Face ID / vân tay (WebAuthn, khoá nằm trong máy, không gửi đi đâu).
   Đổi web app: chỉ sửa APP_URL bên dưới (URL triển khai, kết thúc bằng /exec).
 -->
@@ -81,7 +84,7 @@
 <div id="moi" class="an" role="dialog" aria-label="Bật mở bằng Face ID / vân tay">
   <b>Mở nhanh bằng Face ID / vân tay?</b><br>
   Lần sau mở ứng dụng chỉ cần nhìn hoặc chạm, không phải nhập PIN.
-  Dùng khi Anh/Chị đã đăng nhập và tích <i>"Ghi nhớ trên máy này"</i>.
+  Dùng khi Anh/Chị đã đăng nhập trên máy này.
   <div class="nut"><button class="khong" id="btnKhong">Để sau</button><button class="co" id="btnBat">Bật</button></div>
 </div>
 
@@ -98,8 +101,29 @@
   function ghi(k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} }
   $('moThang').href = APP_URL;
 
+  // ---------------- v24.1: giữ hộ mã phiên ghi nhớ cho web app ----------------
+  // Web app Apps Script chạy ở địa chỉ *.googleusercontent.com; chỉ trao đổi với đúng loại địa chỉ đó.
+  window.addEventListener('message', function (e) {
+    if (!/^https:\/\/[a-z0-9-]+\.googleusercontent\.com$/.test(e.origin)) return;
+    var d = e.data;
+    if (!d || d.pxvh !== 1) return;
+    if (d.loai === 'luu' && d.t) ghi('pxvh_phien', String(d.t));
+    else if (d.loai === 'xoa') ghi('pxvh_phien', null);
+    else if (d.loai === 'xin' && e.source) e.source.postMessage({ pxvh: 1, loai: 'cap', t: doc('pxvh_phien') || '' }, e.origin);
+    else if (d.loai === 'tai' && d.du) taiVe(String(d.ten || 'tai_ve.xlsx'), d.du, String(d.kieu || 'application/octet-stream'));   // v24.2
+  });
+
+  // v24.2: tải file (Excel) do web app gửi sang – iPhone chỉ cho tải từ trang chính
+  function taiVe(ten, du, kieu) {
+    var url = URL.createObjectURL(new Blob([du], { type: kieu }));
+    var a = document.createElement('a'); a.href = url; a.download = ten.replace(/[\\\/:*?"<>|]/g, '_');
+    document.body.appendChild(a); a.click();
+    setTimeout(function () { URL.revokeObjectURL(url); a.remove(); }, 4000);
+  }
+
   // ---------------- Mở web app ----------------
   function mo(batPin) {
+    if (batPin) ghi('pxvh_phien', null);
     $('khoa').classList.add('an');
     cho.classList.remove('an');
     if (!navigator.onLine) { tb.textContent = 'Không có kết nối mạng. Kiểm tra mạng rồi chạm vào đây để thử lại.'; return; }
