@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<!--
+  TRANG KHỞI CHẠY (v22) – đặt trên GitHub Pages để "Thêm vào màn hình chính" có logo + tên.
+  Trang này KHÔNG chứa dữ liệu, PIN hay mã phiên; chỉ nhúng web app Apps Script (URL /exec) toàn màn hình.
+  Có thêm khoá mở ứng dụng bằng Face ID / vân tay (WebAuthn, khoá nằm trong máy, không gửi đi đâu).
+  Đổi web app: chỉ sửa APP_URL bên dưới (URL triển khai, kết thúc bằng /exec).
+-->
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>Quản lý kỹ thuật Phân xưởng Vận hành-NĐNS</title>
+<meta name="description" content="Quản lý kỹ thuật Phân xưởng Vận hành – Công ty Nhiệt điện Nghi Sơn">
+<meta name="theme-color" content="#193887">
+<!-- iPhone/iPad -->
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Quản lý kỹ thuật Phân xưởng Vận hành-NĐNS">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<!-- Android/máy tính -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="PXVH-NĐNS">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="favicon.png">
+<style>
+  :root { --evn: #193887; --evn-2: #2A4A98; --sky: #80BEFF; --red: #EC3236; --ink: #1B2430; --muted: #5A6472; }
+  html, body { margin: 0; height: 100%; overflow: hidden; }
+  body { background: var(--evn); font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif; color: var(--ink); }
+  /* Thanh trạng thái iPhone (tai thỏ) tô xanh EVN; web app nằm ngay dưới */
+  #app { position: fixed; left: 0; right: 0; bottom: 0; top: env(safe-area-inset-top); width: 100%;
+         height: calc(100% - env(safe-area-inset-top)); border: 0; display: block; background: #fff; }
+  .man { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+         gap: 14px; z-index: 2; text-align: center; padding: 24px 20px calc(24px + env(safe-area-inset-bottom));
+         background: linear-gradient(160deg, var(--evn) 0%, #2F5DB3 65%, var(--sky) 100%); color: #fff; }
+  .man img { width: 104px; height: 104px; border-radius: 24px; box-shadow: 0 8px 28px rgba(0, 0, 0, .25); }
+  .man .ten { font-weight: 700; font-size: 19px; line-height: 1.35; max-width: 320px; }
+  .man .dv { font-size: 13px; color: #D6E4FF; margin-top: -8px; }
+  .man .tb { font-size: 14px; color: #E3ECFF; min-height: 20px; max-width: 320px; }
+  .man button.chinh { margin-top: 10px; min-width: 260px; padding: 14px 20px; border: 0; border-radius: 12px;
+         background: #fff; color: var(--evn); font-weight: 700; font-size: 16px; cursor: pointer; }
+  .man button.phu, .man a { background: none; border: 0; color: #fff; text-decoration: underline; font-size: 14px; cursor: pointer; padding: 6px; }
+  .man .nho { font-size: 12px; color: #C9DAFF; }
+  #moi { position: fixed; left: 12px; right: 12px; top: calc(env(safe-area-inset-top) + 10px); z-index: 3;
+         background: #fff; color: var(--ink); border-radius: 12px; padding: 14px; box-shadow: 0 10px 30px rgba(0, 0, 0, .25);
+         border-top: 4px solid var(--evn); max-width: 480px; margin: 0 auto; font-size: 14px; line-height: 1.45; }
+  #moi b { color: var(--evn); }
+  #moi .nut { display: flex; gap: 8px; margin-top: 10px; }
+  #moi button { flex: 1; padding: 10px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; }
+  #moi .co { background: var(--evn); color: #fff; border: 0; }
+  #moi .khong { background: #fff; color: var(--muted); border: 1px solid #C5CFDE; }
+  .an { display: none !important; }
+</style>
+</head>
+<body>
+<!-- Màn chờ -->
+<div id="cho" class="man">
+  <img src="apple-touch-icon.png" alt="">
+  <div class="ten">Quản lý kỹ thuật Phân xưởng Vận hành</div>
+  <div class="dv">Công ty Nhiệt điện Nghi Sơn</div>
+  <div class="tb" id="tb">Đang mở…</div>
+  <a id="moThang" class="an" href="#" target="_blank" rel="noopener">Mở trực tiếp trong trình duyệt</a>
+</div>
+
+<!-- Màn mở khoá Face ID / vân tay -->
+<div id="khoa" class="man an">
+  <img src="apple-touch-icon.png" alt="">
+  <div class="ten">Quản lý kỹ thuật Phân xưởng Vận hành</div>
+  <div class="dv">Công ty Nhiệt điện Nghi Sơn</div>
+  <button class="chinh" id="btnMoKhoa">Mở bằng Face ID / vân tay</button>
+  <div class="tb" id="tbKhoa"></div>
+  <button class="phu" id="btnDungPin">Dùng tên đăng nhập + PIN</button>
+  <button class="phu nho" id="btnTatKhoa">Tắt mở bằng Face ID / vân tay trên máy này</button>
+</div>
+
+<!-- Mời bật Face ID / vân tay -->
+<div id="moi" class="an" role="dialog" aria-label="Bật mở bằng Face ID / vân tay">
+  <b>Mở nhanh bằng Face ID / vân tay?</b><br>
+  Lần sau mở ứng dụng chỉ cần nhìn hoặc chạm, không phải nhập PIN.
+  Dùng khi Anh/Chị đã đăng nhập và tích <i>"Ghi nhớ trên máy này"</i>.
+  <div class="nut"><button class="khong" id="btnKhong">Để sau</button><button class="co" id="btnBat">Bật</button></div>
+</div>
+
+<iframe id="app" title="Quản lý kỹ thuật Phân xưởng Vận hành"
+  allow="clipboard-write; fullscreen" referrerpolicy="no-referrer-when-downgrade"></iframe>
+<script>
+  // URL triển khai web app (Apps Script › Triển khai › Quản lý các bản triển khai › URL web app)
+  var APP_URL = 'https://script.google.com/macros/s/AKfycbz4jpLBkDU955VZs4D5zx11NTKVE8L00dEDsihbh5FQq-hNIqzJsohqHYls-9rZdZJn/exec';
+
+  var $ = function (id) { return document.getElementById(id); };
+  var f = $('app'), cho = $('cho'), tb = $('tb');
+  function doc(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function ghi(k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} }
+  $('moThang').href = APP_URL;
+
+  // ---------------- Mở web app ----------------
+  function mo(batPin) {
+    $('khoa').classList.add('an');
+    cho.classList.remove('an');
+    if (!navigator.onLine) { tb.textContent = 'Không có kết nối mạng. Kiểm tra mạng rồi chạm vào đây để thử lại.'; return; }
+    tb.textContent = 'Đang mở…';
+    f.src = APP_URL + (batPin ? '?dn=pin' : '');
+    setTimeout(function () {                    // mạng chậm: hiện đường mở trực tiếp
+      if (!cho.classList.contains('an')) { $('moThang').classList.remove('an'); tb.textContent = 'Mạng chậm, vẫn đang mở…'; }
+    }, 15000);
+  }
+  f.addEventListener('load', function () { if (f.src) { cho.classList.add('an'); setTimeout(moiBat, 1500); } });
+  tb.addEventListener('click', function () { if (!f.src || !navigator.onLine) mo(); });
+  window.addEventListener('online', function () { if (!f.src && $('khoa').classList.contains('an')) mo(); });
+
+  // ---------------- Face ID / vân tay (WebAuthn, chỉ kiểm tra trên máy) ----------------
+  function b64(buf) { return btoa(String.fromCharCode.apply(null, new Uint8Array(buf))); }
+  function unb64(s) { return Uint8Array.from(atob(s), function (c) { return c.charCodeAt(0); }); }
+  function ngauNhien(n) { var a = new Uint8Array(n); crypto.getRandomValues(a); return a; }
+  function coSinhTracHoc() {
+    if (!window.PublicKeyCredential || !PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable) return Promise.resolve(false);
+    return PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable().catch(function () { return false; });
+  }
+  function batKhoa() {
+    return navigator.credentials.create({ publicKey: {
+      challenge: ngauNhien(32),
+      rp: { name: 'PXVH-NĐNS' },
+      user: { id: ngauNhien(16), name: 'pxvh', displayName: 'PXVH – máy này' },
+      pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
+      authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required', residentKey: 'discouraged' },
+      timeout: 60000, attestation: 'none'
+    } }).then(function (c) { ghi('pxvh_khoa', b64(c.rawId)); });
+  }
+  function moKhoa() {
+    $('tbKhoa').textContent = '';
+    navigator.credentials.get({ publicKey: {
+      challenge: ngauNhien(32),
+      allowCredentials: [{ type: 'public-key', id: unb64(doc('pxvh_khoa')) }],
+      userVerification: 'required', timeout: 60000
+    } }).then(function () { mo(false); }).catch(function () {
+      $('tbKhoa').textContent = 'Chưa xác thực được. Chạm "Mở bằng Face ID / vân tay" để thử lại, hoặc dùng PIN.';
+    });
+  }
+  function moiBat() {
+    if (doc('pxvh_khoa') || doc('pxvh_khong_moi')) return;
+    var lan = (+doc('pxvh_lan_mo') || 0) + 1; ghi('pxvh_lan_mo', lan);
+    if (lan < 2) return;                          // từ lần mở thứ 2 (thường đã đăng nhập + ghi nhớ) mới mời
+    coSinhTracHoc().then(function (co) {
+      if (!co) return;
+      $('moi').classList.remove('an');
+      setTimeout(function () { $('moi').classList.add('an'); }, 20000);
+    });
+  }
+  $('btnBat').onclick = function () {
+    $('moi').classList.add('an');
+    batKhoa().then(function () {
+      var m = $('moi'); m.innerHTML = '<b>Đã bật.</b> Lần sau mở ứng dụng sẽ hỏi Face ID / vân tay.';
+      m.classList.remove('an'); setTimeout(function () { m.classList.add('an'); }, 3500);
+    }).catch(function () {});
+  };
+  $('btnKhong').onclick = function () { $('moi').classList.add('an'); ghi('pxvh_khong_moi', '1'); };
+  $('btnMoKhoa').onclick = moKhoa;
+  $('btnDungPin').onclick = function () { mo(true); };
+  $('btnTatKhoa').onclick = function () { ghi('pxvh_khoa', null); ghi('pxvh_khong_moi', '1'); mo(false); };
+
+  // ---------------- Bắt đầu ----------------
+  if (doc('pxvh_khoa')) { cho.classList.add('an'); $('khoa').classList.remove('an'); }
+  else mo(false);
+</script>
+</body>
+</html>
