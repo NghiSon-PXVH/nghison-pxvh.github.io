@@ -1,8 +1,8 @@
 {
   "id": "./",
-  "name": "Quản lý kỹ thuật Phân xưởng Vận hành-NĐNS",
+  "name": "Quản lý Kỹ thuật Phân xưởng Vận hành-NĐNS",
   "short_name": "PXVH-NĐNS",
-  "description": "Quản lý kỹ thuật Phân xưởng Vận hành – Công ty Nhiệt điện Nghi Sơn",
+  "description": "Quản lý Kỹ thuật Phân xưởng Vận hành – Công ty Nhiệt điện Nghi Sơn",
   "lang": "vi",
   "start_url": "./",
   "scope": "./",
