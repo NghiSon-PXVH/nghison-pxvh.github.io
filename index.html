@@ -12,14 +12,14 @@
   Đổi web app: chỉ sửa APP_URL bên dưới (URL triển khai, kết thúc bằng /exec).
 -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-<title>Quản lý kỹ thuật Phân xưởng Vận hành-NĐNS</title>
-<meta name="description" content="Quản lý kỹ thuật Phân xưởng Vận hành – Công ty Nhiệt điện Nghi Sơn">
+<title>Quản lý Kỹ thuật Phân xưởng Vận hành-NĐNS</title>
+<meta name="description" content="Quản lý Kỹ thuật Phân xưởng Vận hành – Công ty Nhiệt điện Nghi Sơn">
 <meta name="theme-color" content="#193887">
 <!-- iPhone/iPad -->
 <link rel="apple-touch-icon" sizes="180x180" href="https://nghison-pxvh.github.io/apple-touch-icon.png?v=22">
 <link rel="apple-touch-icon-precomposed" sizes="180x180" href="https://nghison-pxvh.github.io/apple-touch-icon.png?v=22">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Quản lý kỹ thuật Phân xưởng Vận hành-NĐNS">
+<meta name="apple-mobile-web-app-title" content="Quản lý Kỹ thuật Phân xưởng Vận hành-NĐNS">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <!-- Android/máy tính -->
 <meta name="mobile-web-app-capable" content="yes">
@@ -57,7 +57,6 @@
   #moi .co { background: var(--evn); color: #fff; border: 0; }
   #moi .khong { background: #fff; color: var(--muted); border: 1px solid #C5CFDE; }
   .an { display: none !important; }
-
   /* PXVH 2026-11-04: CHI DOI HINH NEN MAN CHO #cho; GIU NGUYEN MO APP / PHIEN / FACE ID / DOWNLOAD. */
   #cho {
     background-color: #193887;
@@ -80,29 +79,29 @@
       background-position: center center;
     }
   }
+  /* Tên ứng dụng đầy đủ chỉ một dòng, tối ưu kích thước ở màn hình nhỏ. */
+  #cho .ten, #khoa .ten { white-space: nowrap; max-width: 100%; font-size: clamp(11px, 3.15vw, 17px); letter-spacing: -.4px; }
 </style>
 </head>
 <body>
 <!-- Màn chờ -->
 <div id="cho" class="man">
   <img src="apple-touch-icon.png" alt="">
-  <div class="ten">Quản lý kỹ thuật Phân xưởng Vận hành</div>
+  <div class="ten">Quản lý Kỹ thuật Phân xưởng Vận hành</div>
   <div class="dv">Công ty Nhiệt điện Nghi Sơn</div>
   <div class="tb" id="tb">Đang mở…</div>
   <a id="moThang" class="an" href="#" target="_blank" rel="noopener">Mở trực tiếp trong trình duyệt</a>
 </div>
-
 <!-- Màn mở khoá Face ID / vân tay -->
 <div id="khoa" class="man an">
   <img src="apple-touch-icon.png" alt="">
-  <div class="ten">Quản lý kỹ thuật Phân xưởng Vận hành</div>
+  <div class="ten">Quản lý Kỹ thuật Phân xưởng Vận hành</div>
   <div class="dv">Công ty Nhiệt điện Nghi Sơn</div>
   <button class="chinh" id="btnMoKhoa">Mở bằng Face ID / vân tay</button>
   <div class="tb" id="tbKhoa"></div>
   <button class="phu" id="btnDungPin">Dùng tên đăng nhập + PIN</button>
   <button class="phu nho" id="btnTatKhoa">Tắt mở bằng Face ID / vân tay trên máy này</button>
 </div>
-
 <!-- Mời bật Face ID / vân tay -->
 <div id="moi" class="an" role="dialog" aria-label="Bật mở bằng Face ID / vân tay">
   <b>Mở nhanh bằng Face ID / vân tay?</b><br>
@@ -110,20 +109,17 @@
   Dùng khi Anh/Chị đã đăng nhập trên máy này.
   <div class="nut"><button class="khong" id="btnKhong">Để sau</button><button class="co" id="btnBat">Bật</button></div>
 </div>
-
 <div id="tai"></div>
-<iframe id="app" title="Quản lý kỹ thuật Phân xưởng Vận hành"
+<iframe id="app" title="Quản lý Kỹ thuật Phân xưởng Vận hành"
   allow="clipboard-write; fullscreen" referrerpolicy="no-referrer-when-downgrade"></iframe>
 <script>
   // URL triển khai web app (Apps Script › Triển khai › Quản lý các bản triển khai › URL web app)
   var APP_URL = 'https://script.google.com/macros/s/AKfycbz4jpLBkDU955VZs4D5zx11NTKVE8L00dEDsihbh5FQq-hNIqzJsohqHYls-9rZdZJn/exec';
-
   var $ = function (id) { return document.getElementById(id); };
   var f = $('app'), cho = $('cho'), tb = $('tb');
   function doc(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function ghi(k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} }
   $('moThang').href = APP_URL;
-
   // ---------------- v24.1: giữ hộ mã phiên ghi nhớ cho web app ----------------
   // Web app Apps Script chạy ở địa chỉ *.googleusercontent.com; chỉ trao đổi với đúng loại địa chỉ đó.
   window.addEventListener('message', function (e) {
@@ -135,7 +131,6 @@
     else if (d.loai === 'xin' && e.source) e.source.postMessage({ pxvh: 1, loai: 'cap', t: doc('pxvh_phien') || '' }, e.origin);
     else if (d.loai === 'tai' && d.du) taiVe(String(d.ten || 'tai_ve.xlsx'), d.du, String(d.kieu || 'application/octet-stream'));   // v24.2
   });
-
   // v24.2: tải file (Excel) do web app gửi sang – iPhone chỉ cho tải từ trang chính
   function taiVe(ten, du, kieu) {
     var url = URL.createObjectURL(new Blob([du], { type: kieu }));
@@ -143,7 +138,6 @@
     document.body.appendChild(a); a.click();
     setTimeout(function () { URL.revokeObjectURL(url); a.remove(); }, 4000);
   }
-
   // ---------------- Mở web app ----------------
   function mo(batPin) {
     if (batPin) ghi('pxvh_phien', null);
@@ -159,7 +153,6 @@
   f.addEventListener('load', function () { if (f.src) { cho.classList.add('an'); setTimeout(moiBat, 1500); } });
   tb.addEventListener('click', function () { if (!f.src || !navigator.onLine) mo(); });
   window.addEventListener('online', function () { if (!f.src && $('khoa').classList.contains('an')) mo(); });
-
   // ---------------- Face ID / vân tay (WebAuthn, chỉ kiểm tra trên máy) ----------------
   function b64(buf) { return btoa(String.fromCharCode.apply(null, new Uint8Array(buf))); }
   function unb64(s) { return Uint8Array.from(atob(s), function (c) { return c.charCodeAt(0); }); }
@@ -209,7 +202,6 @@
   $('btnMoKhoa').onclick = moKhoa;
   $('btnDungPin').onclick = function () { mo(true); };
   $('btnTatKhoa').onclick = function () { ghi('pxvh_khoa', null); ghi('pxvh_khong_moi', '1'); mo(false); };
-
   // ---------------- Bắt đầu ----------------
   if (doc('pxvh_khoa')) { cho.classList.add('an'); $('khoa').classList.remove('an'); }
   else mo(false);
